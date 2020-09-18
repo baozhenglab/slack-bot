@@ -13,7 +13,7 @@ import (
 )
 
 type slackService struct {
-	token string
+	webhook string
 }
 
 var client = http.Client{
@@ -21,7 +21,6 @@ var client = http.Client{
 }
 
 const (
-	grapURL    = "https://slack.com/api"
 	KeyService = "slack-bot"
 )
 
@@ -35,7 +34,7 @@ func (slack *slackService) GetPrefix() string {
 
 func (slack *slackService) InitFlags() {
 	prefix := fmt.Sprintf("%s-", slack.Name())
-	flag.StringVar(&slack.token, prefix+"token", "", "Token of slack bot")
+	flag.StringVar(&slack.webhook, prefix+"webhook-url", "", "Webhook url of slack bot")
 }
 
 func (slack *slackService) Get() interface{} {
@@ -47,7 +46,7 @@ func NewSlackBot() goservice.PrefixConfigure {
 }
 
 func (slack *slackService) SendMessage(form map[string]string) error {
-	endPointRequest := grapURL + "/chat.postMessage"
+	endPointRequest := slack.webhook
 	jsonValue, err := json.Marshal(form)
 	if err != nil {
 		return nil
@@ -57,7 +56,6 @@ func (slack *slackService) SendMessage(form map[string]string) error {
 		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+slack.token)
 	response, err := client.Do(req)
 	if err != nil {
 		return err
